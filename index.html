@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi Interaktif: Faktor, KPK, dan FPB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tree-line {
+            stroke: #cbd5e1;
+            stroke-width: 3;
+            stroke-dasharray: 4;
+            animation: dash 1s linear infinite;
+        }
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -8;
+            }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .pulse-highlight {
+            animation: pulse-glow 1.5s infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.08); opacity: 0.9; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header Navigation -->
+    <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-indigo-600 rounded-xl shadow-inner">
+                        <i class="fa-solid fa-calculator text-2xl text-amber-300"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-lg sm:text-xl tracking-tight leading-none">Matematika Visual</h1>
+                        <p class="text-xs text-indigo-200">Faktor, KPK, FPB & Aplikasi Nyata</p>
+                    </div>
+                </div>
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex space-x-1 bg-indigo-800/60 p-1.5 rounded-xl border border-indigo-600/50">
+                    <button onclick="switchTab('faktor')" id="tab-btn-faktor" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-indigo-700 shadow-md">
+                        <i class="fa-solid fa-cubes mr-1.5"></i> Faktor & Pohon
+                    </button>
+                    <button onclick="switchTab('kpk')" id="tab-btn-kpk" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-indigo-100 hover:text-white hover:bg-indigo-700/50">
+                        <i class="fa-solid fa-chart-line mr-1.5"></i> KPK (Kelipatan)
+                    </button>
+                    <button onclick="switchTab('fpb')" id="tab-btn-fpb" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-indigo-100 hover:text-white hover:bg-indigo-700/50">
+                        <i class="fa-solid fa-shapes mr-1.5"></i> FPB (Pembagi)
+                    </button>
+                    <button onclick="switchTab('terapan')" id="tab-btn-terapan" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-indigo-100 hover:text-white hover:bg-indigo-700/50">
+                        <i class="fa-solid fa-city mr-1.5"></i> Terapan Nyata
+                    </button>
+                    <button onclick="switchTab('kalkulator')" id="tab-btn-kalkulator" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-indigo-100 hover:text-white hover:bg-indigo-700/50">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> Kalkulator Solusi
+                    </button>
+                </nav>
+            </div>
+        </div>
+        <!-- Mobile Navigation Menu -->
+        <div class="md:hidden flex overflow-x-auto p-2 bg-indigo-800 space-x-2 border-t border-indigo-600/50 custom-scrollbar">
+            <button onclick="switchTab('faktor')" id="mob-tab-faktor" class="mob-tab-btn flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-indigo-700">Faktor</button>
+            <button onclick="switchTab('kpk')" id="mob-tab-kpk" class="mob-tab-btn flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-200">KPK</button>
+            <button onclick="switchTab('fpb')" id="mob-tab-fpb" class="mob-tab-btn flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-200">FPB</button>
+            <button onclick="switchTab('terapan')" id="mob-tab-terapan" class="mob-tab-btn flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-200">Aplikasi Nyata</button>
+            <button onclick="switchTab('kalkulator')" id="mob-tab-kalkulator" class="mob-tab-btn flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-200">Kalkulator</button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <!-- ================= TAB 1: FAKTOR & POHON FAKTOR ================= -->
+        <section id="tab-faktor" class="tab-content block space-y-6">
+            <!-- Concept Banner -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+                <div class="relative z-10 max-w-2xl">
+                    <span class="bg-blue-400/30 text-blue-100 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Konsep Dasar</span>
+                    <h2 class="text-2xl font-bold mt-2">Apa itu Faktor & Faktorisasi Prima?</h2>
+                    <p class="text-blue-100 mt-2 text-sm leading-relaxed">
+                        <b>Faktor</b> adalah semua bilangan yang dapat membagi habis suatu bilangan tanpa sisa.
+                        <b>Faktorisasi Prima</b> adalah menyatakan suatu bilangan sebagai perkalian dari bilangan-bilangan prima (2, 3, 5, 7, 11, ...).
+                    </p>
+                </div>
+                <i class="fa-solid fa-diagram-project absolute right-4 -bottom-6 text-9xl text-white/10 pointer-events-none"></i>
+            </div>
+
+            <!-- Controls & Interactive Visuals -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Control Card -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center">
+                        <i class="fa-solid fa-sliders text-indigo-600 mr-2"></i> Pilih / Masukkan Bilangan
+                    </h3>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Bilangan (1 - 100):</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" id="faktor-input" min="2" max="100" value="24" onchange="renderFaktorModule()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 font-bold text-xl text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <button onclick="renderFaktorModule()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl font-bold transition shadow-sm">
+                                Hitung
+                            </button>
+                        </div>
+                        <input type="range" id="faktor-slider" min="2" max="100" value="24" oninput="document.getElementById('faktor-input').value=this.value; renderFaktorModule()" class="w-full mt-3 accent-indigo-600 cursor-pointer">
+                    </div>
+
+                    <!-- Fast Presets -->
+                    <div>
+                        <span class="text-xs font-semibold text-slate-400">Contoh Cepat:</span>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <button onclick="setFaktorPreset(12)" class="px-3 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg text-xs font-bold transition">12</button>
+                            <button onclick="setFaktorPreset(24)" class="px-3 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg text-xs font-bold transition">24</button>
+                            <button onclick="setFaktorPreset(36)" class="px-3 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg text-xs font-bold transition">36</button>
+                            <button onclick="setFaktorPreset(60)" class="px-3 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg text-xs font-bold transition">60</button>
+                            <button onclick="setFaktorPreset(72)" class="px-3 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg text-xs font-bold transition">72</button>
+                        </div>
+                    </div>
+
+                    <!-- Summary Output -->
+                    <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-100 space-y-2">
+                        <div>
+                            <span class="text-xs text-indigo-600 font-bold block">Semua Faktor dari <span class="val-num">24</span>:</span>
+                            <div id="faktor-list" class="flex flex-wrap gap-1.5 mt-1"></div>
+                        </div>
+                        <hr class="border-indigo-100 my-2">
+                        <div>
+                            <span class="text-xs text-indigo-600 font-bold block">Faktorisasi Prima:</span>
+                            <p id="faktor-prima-text" class="text-lg font-extrabold text-indigo-900 mt-0.5">2³ × 3</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pohon Faktor Visualizer -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">Pohon Faktor Interaktif</h3>
+                            <p class="text-xs text-slate-500">Lingkaran hijau melambangkan bilangan prima pembagi</p>
+                        </div>
+                        <span class="text-xs font-bold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">
+                            Visualisasi Hirarki
+                        </span>
+                    </div>
+
+                    <!-- Tree Container -->
+                    <div id="tree-container" class="flex-grow min-h-[300px] flex items-center justify-center border border-slate-100 rounded-xl bg-slate-50/50 p-4 overflow-auto">
+                        <!-- SVG / Tree rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid Array Representation of Pairs -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-800 text-base mb-1">Visualisasi Pasangan Perkalian (Grid Rectangles)</h3>
+                <p class="text-xs text-slate-500 mb-4">Bagaimana bilangan ini disusun dalam susunan baris dan kolom yang pas:</p>
+                <div id="grid-pairs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Pair grids rendered dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: KPK (KELIPATAN PERSEKUTUAN TERKECIL) ================= -->
+        <section id="tab-kpk" class="tab-content hidden space-y-6">
+            <!-- Concept Banner -->
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+                <div class="relative z-10 max-w-2xl">
+                    <span class="bg-emerald-400/30 text-emerald-100 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Konsep KPK</span>
+                    <h2 class="text-2xl font-bold mt-2">Kelipatan Persekutuan Terkecil (KPK)</h2>
+                    <p class="text-emerald-100 mt-2 text-sm leading-relaxed">
+                        <b>Kelipatan</b> adalah hasil perkalian bilangan dengan bilangan bulat positif.
+                        <b>KPK</b> adalah kelipatan terkecil yang sama (serikat) yang dimiliki oleh dua bilangan atau lebih.
+                    </p>
+                </div>
+                <i class="fa-solid fa-chart-line absolute right-4 -bottom-6 text-9xl text-white/10 pointer-events-none"></i>
+            </div>
+
+            <!-- Controls & Controls -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Bilangan Pertama (A):</label>
+                        <input type="number" id="kpk-a" min="2" max="30" value="4" onchange="renderKPKModule()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 font-bold text-lg text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Bilangan Kedua (B):</label>
+                        <input type="number" id="kpk-b" min="2" max="30" value="6" onchange="renderKPKModule()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 font-bold text-lg text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <button onclick="renderKPKModule()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-sm">
+                            Hitung & Visualisasikan KPK
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Line Jumps / Multiples Grid -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-lg">Visualisasi Lompatan Kelipatan</h3>
+                        <p class="text-xs text-slate-500">Perhatikan titik lokasi di mana lompatan kedua bilangan bertemu pertama kali</p>
+                    </div>
+                    <div class="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-200 flex items-center space-x-2">
+                        <span class="text-xs font-bold text-emerald-700">KPK(<span id="kpk-val-a">4</span>, <span id="kpk-val-b">6</span>) =</span>
+                        <span id="kpk-result" class="text-xl font-black text-emerald-700">12</span>
+                    </div>
+                </div>
+
+                <!-- Number Track / Multiples Grid -->
+                <div class="space-y-4">
+                    <!-- Track A -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-bold mb-1">
+                            <span class="text-blue-600 flex items-center"><i class="fa-solid fa-person-running mr-1"></i> Kelipatan Bilangan A (<span class="kpk-num-a">4</span>)</span>
+                        </div>
+                        <div id="kpk-track-a" class="flex overflow-x-auto gap-2 py-2 px-1 custom-scrollbar"></div>
+                    </div>
+
+                    <!-- Track B -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-bold mb-1">
+                            <span class="text-amber-600 flex items-center"><i class="fa-solid fa-person-running mr-1"></i> Kelipatan Bilangan B (<span class="kpk-num-b">6</span>)</span>
+                        </div>
+                        <div id="kpk-track-b" class="flex overflow-x-auto gap-2 py-2 px-1 custom-scrollbar"></div>
+                    </div>
+
+                    <!-- Unified Overlap Number Line -->
+                    <div class="pt-4 border-t border-slate-100">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Garis Pertemuan Kelipatan (0 - 60):</h4>
+                        <div id="kpk-unified-line" class="flex overflow-x-auto gap-1.5 py-3 px-1 custom-scrollbar bg-slate-50 rounded-xl border border-slate-200"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: FPB (FAKTOR PERSEKUTUAN TERBESAR) ================= -->
+        <section id="tab-fpb" class="tab-content hidden space-y-6">
+            <!-- Concept Banner -->
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+                <div class="relative z-10 max-w-2xl">
+                    <span class="bg-purple-400/30 text-purple-100 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Konsep FPB</span>
+                    <h2 class="text-2xl font-bold mt-2">Faktor Persekutuan Terbesar (FPB)</h2>
+                    <p class="text-purple-100 mt-2 text-sm leading-relaxed">
+                        <b>Faktor Persekutuan</b> adalah angka-angka faktor yang sama dari dua bilangan atau lebih.
+                        <b>FPB</b> adalah angka faktor terbesar yang sama di antara bilangan-bilangan tersebut.
+                    </p>
+                </div>
+                <i class="fa-solid fa-shapes absolute right-4 -bottom-6 text-9xl text-white/10 pointer-events-none"></i>
+            </div>
+
+            <!-- Controls -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Bilangan Pertama (A):</label>
+                        <input type="number" id="fpb-a" min="2" max="100" value="24" onchange="renderFPBModule()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 font-bold text-lg text-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Bilangan Kedua (B):</label>
+                        <input type="number" id="fpb-b" min="2" max="100" value="36" onchange="renderFPBModule()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 font-bold text-lg text-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <button onclick="renderFPBModule()" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-sm">
+                            Hitung & Visualisasikan FPB
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Venn Diagram & Tile Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Venn Diagram Card -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-800 text-base">Diagram Venn Faktor</h3>
+                            <span class="text-xs font-extrabold bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
+                                FPB = <span id="fpb-result-val">12</span>
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-4">Irisan di tengah menunjukkan faktor persekutuan (sama). FPB adalah angka terbesar di area irisan.</p>
+                    </div>
+
+                    <!-- Venn Container -->
+                    <div id="venn-container" class="relative w-full h-[260px] bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center p-2">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Geometric Euclid Tiling Card -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base mb-1">Visual Geometri: Ubin Persegi Terbesar</h3>
+                        <p class="text-xs text-slate-500 mb-4">Memotong persegi panjang <span class="font-bold text-purple-700" id="tile-dim">24 x 36</span> menjadi ubin-ubin persegi sama besar tanpa sisa. Ukuran ubin terbesar = FPB.</p>
+                    </div>
+
+                    <!-- Canvas/Container for Tiling Grid -->
+                    <div id="tiling-container" class="w-full h-[260px] bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center p-4 overflow-hidden">
+                        <!-- SVG grid rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: TERAPAN NYATA DALAM KEHIDUPAN ================= -->
+        <section id="tab-terapan" class="tab-content hidden space-y-6">
+            <!-- Concept Banner -->
+            <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+                <div class="relative z-10 max-w-2xl">
+                    <span class="bg-amber-300/30 text-amber-100 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Aplikasi Praktis</span>
+                    <h2 class="text-2xl font-bold mt-2">KPK & FPB dalam Kehidupan Sehari-Hari</h2>
+                    <p class="text-amber-100 mt-2 text-sm leading-relaxed">
+                        Kapan kita menggunakan KPK dan FPB di luar sekolah?
+                        <b>KPK</b> digunakan untuk mencari <i>pertemuan waktu bersamaan</i> (jadwal bus, lampu hias, jadwal les bersama).
+                        <b>FPB</b> digunakan untuk <i>pembagian kelompok/paket adil</i> tanpa sisa (pembagian sembako, membuat parcel, menata kue).
+                    </p>
+                </div>
+                <i class="fa-solid fa-city absolute right-4 -bottom-6 text-9xl text-white/10 pointer-events-none"></i>
+            </div>
+
+            <!-- Two Interactive Simulators -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- SIMULATOR 1: KPK (Jadwal Bus / Penyeberangan) -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-md uppercase">Aplikasi KPK</span>
+                            <i class="fa-solid fa-bus text-emerald-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-lg">Simulasi 1: Jadwal Keberangkatan Bus</h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Dua bus berangkat dari terminal yang sama jam <b>07.00 WIB</b>. Bus A berangkat setiap <b class="text-emerald-700" id="sim-bus-a-lbl">12</b> menit, Bus B setiap <b class="text-emerald-700" id="sim-bus-b-lbl">18</b> menit. Jam berapa mereka berangkat bersamaan lagi?
+                        </p>
+                    </div>
+
+                    <!-- Simulator Inputs -->
+                    <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 uppercase">Interval Bus A (Menit):</label>
+                            <input type="number" id="sim-bus-a" min="2" max="60" value="12" onchange="runBusSimulation()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 font-bold text-sm">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 uppercase">Interval Bus B (Menit):</label>
+                            <input type="number" id="sim-bus-b" min="2" max="60" value="18" onchange="runBusSimulation()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 font-bold text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Visual Output Result -->
+                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-emerald-800">KPK Waktu Interval:</span>
+                            <span id="sim-kpk-result" class="text-base font-extrabold text-emerald-700">36 Menit</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm border-t border-emerald-200/60 pt-2">
+                            <span class="text-slate-600 font-medium">Berangkat Bersama Lagi Pada:</span>
+                            <span id="sim-kpk-time" class="font-black text-slate-900 bg-white px-3 py-1 rounded-lg border border-emerald-300 text-emerald-700">07:36 WIB</span>
+                        </div>
+                    </div>
+
+                    <!-- Bus Animation Graphic -->
+                    <div id="bus-timeline-visual" class="bg-slate-900 text-white p-4 rounded-xl space-y-3">
+                        <!-- Dynamic timetable visual -->
+                    </div>
+                </div>
+
+                <!-- SIMULATOR 2: FPB (Pembagian Parcel Sembako) -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-md uppercase">Aplikasi FPB</span>
+                            <i class="fa-solid fa-gift text-purple-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-lg">Simulasi 2: Pembuatan Paket Bingkisan</h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Ibu memiliki <b class="text-purple-700" id="sim-item-a-lbl">24 Apel</b> dan <b class="text-purple-700" id="sim-item-b-lbl">36 Jeruk</b>. Ibu ingin membungkusnya ke dalam kantong terbanyak dengan isi sama rata tanpa sisa.
+                        </p>
+                    </div>
+
+                    <!-- Inputs -->
+                    <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 uppercase">Jumlah Apel 🍎:</label>
+                            <input type="number" id="sim-item-a" min="2" max="100" value="24" onchange="runParcelSimulation()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 font-bold text-sm">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 uppercase">Jumlah Jeruk 🍊:</label>
+                            <input type="number" id="sim-item-b" min="2" max="100" value="36" onchange="runParcelSimulation()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 font-bold text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Visual Output Result -->
+                    <div class="bg-purple-50 border border-purple-200 p-4 rounded-xl space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-purple-800">Jumlah Kantong Maksimal (FPB):</span>
+                            <span id="sim-fpb-bags" class="text-base font-extrabold text-purple-700">12 Kantong</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-purple-900 border-t border-purple-200/60 pt-2 font-medium">
+                            <span>Isi Tiap Kantong:</span>
+                            <span id="sim-fpb-per-bag" class="font-bold bg-white px-2.5 py-1 rounded-md border border-purple-200">2 Apel & 3 Jeruk</span>
+                        </div>
+                    </div>
+
+                    <!-- Parcel Bags Container Visual -->
+                    <div id="parcel-bags-visual" class="bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-[160px] overflow-y-auto custom-scrollbar flex flex-wrap gap-2 justify-center">
+                        <!-- Dynamic Bags -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= TAB 5: KALKULATOR SOLUSI & STEP BY STEP ================= -->
+        <section id="tab-kalkulator" class="tab-content hidden space-y-6">
+            <!-- Concept Banner -->
+            <div class="bg-gradient-to-r from-slate-700 to-slate-900 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+                <div class="relative z-10 max-w-2xl">
+                    <span class="bg-slate-500/30 text-slate-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Penyelesai Otomatis</span>
+                    <h2 class="text-2xl font-bold mt-2">Kalkulator KPK & FPB Serbaguna</h2>
+                    <p class="text-slate-300 mt-2 text-sm leading-relaxed">
+                        Masukkan hingga 3 bilangan untuk mendapatkan FPB, KPK, faktor prima, dan uraian langkah penyelesaian secara lengkap.
+                    </p>
+                </div>
+                <i class="fa-solid fa-wand-magic-sparkles absolute right-4 -bottom-6 text-9xl text-white/10 pointer-events-none"></i>
+            </div>
+
+            <!-- Multi Input Calculator Card -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Bilangan X:</label>
+                        <input type="number" id="calc-x" min="1" max="500" value="12" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 font-bold text-lg text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Bilangan Y:</label>
+                        <input type="number" id="calc-y" min="1" max="500" value="18" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 font-bold text-lg text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Bilangan Z (Opsional):</label>
+                        <input type="number" id="calc-z" min="1" max="500" placeholder="Kosongkan jika 2 angka" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 font-bold text-lg text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <button onclick="calculateUniversalSolver()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-base transition shadow-md flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>Hitung FPB & KPK Lengkap</span>
+                </button>
+
+                <!-- Detailed Result Output -->
+                <div id="solver-output" class="hidden space-y-6 pt-4 border-t border-slate-100">
+                    <!-- Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-purple-50 p-5 rounded-2xl border border-purple-200 text-purple-900">
+                            <span class="text-xs font-bold uppercase tracking-wider text-purple-600 block">Faktor Persekutuan Terbesar (FPB)</span>
+                            <div id="out-fpb-val" class="text-4xl font-black mt-1 text-purple-900">6</div>
+                        </div>
+                        <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-200 text-emerald-900">
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 block">Kelipatan Persekutuan Terkecil (KPK)</span>
+                            <div id="out-kpk-val" class="text-4xl font-black mt-1 text-emerald-900">36</div>
+                        </div>
+                    </div>
+
+                    <!-- Step Explanation Breakdown -->
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+                        <h4 class="font-bold text-slate-800 text-base border-b border-slate-200 pb-2">Langkah Penyelesaian Metode Faktorisasi Prima:</h4>
+                        <div id="out-steps-content" class="space-y-3 text-sm text-slate-700">
+                            <!-- Dynamic Steps inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <p class="font-semibold text-slate-300">Media Pembelajaran Interaktif Matematika — Faktor, KPK & FPB</p>
+            <p>Dirancang untuk memfasilitasi pemahaman konsep secara visual dan terapan praktis.</p>
+        </div>
+    </footer>
+
+    <script>
+        /* ================= NAVIGATION LOGIC ================= */
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            // Show selected tab content
+            const targetContent = document.getElementById(`tab-${tabId}`);
+            if(targetContent) targetContent.classList.remove('hidden');
+
+            // Reset Desktop Nav classes
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = 'tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-indigo-100 hover:text-white hover:bg-indigo-700/50';
+            });
+            const activeDesktop = document.getElementById(`tab-btn-${tabId}`);
+            if(activeDesktop) {
+                activeDesktop.className = 'tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-indigo-700 shadow-md';
+            }
+
+            // Reset Mobile Nav classes
+            document.querySelectorAll('.mob-tab-btn').forEach(btn => {
+                btn.className = 'mob-tab-btn flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-200';
+            });
+            const activeMobile = document.getElementById(`mob-tab-${tabId}`);
+            if(activeMobile) {
+                activeMobile.className = 'mob-tab-btn flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-indigo-700';
+            }
+
+            // Trigger specific module renders
+            if(tabId === 'faktor') renderFaktorModule();
+            if(tabId === 'kpk') renderKPKModule();
+            if(tabId === 'fpb') renderFPBModule();
+            if(tabId === 'terapan') {
+                runBusSimulation();
+                runParcelSimulation();
+            }
+            if(tabId === 'kalkulator') calculateUniversalSolver();
+        }
+
+        /* ================= MATHEMATICAL UTILITY FUNCTIONS ================= */
+        function getFactors(n) {
+            let factors = [];
+            for (let i = 1; i <= n; i++) {
+                if (n % i === 0) factors.push(i);
+            }
+            return factors;
+        }
+
+        function getPrimeFactors(n) {
+            let temp = n;
+            let factors = [];
+            let divisor = 2;
+            while (temp >= 2) {
+                if (temp % divisor === 0) {
+                    factors.push(divisor);
+                    temp /= divisor;
+                } else {
+                    divisor++;
+                }
+            }
+            return factors;
+        }
+
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
+        function lcm(a, b) {
+            if (a === 0 || b === 0) return 0;
+            return Math.abs(a * b) / gcd(a, b);
+        }
+
+        function formatPrimeExponent(primeArr) {
+            const counts = {};
+            primeArr.forEach(x => counts[x] = (counts[x] || 0) + 1);
+            return Object.keys(counts).map(p => {
+                const exp = counts[p];
+                return exp > 1 ? `${p}<sup>${exp}</sup>` : `${p}`;
+            }).join(' × ');
+        }
+
+        /* ================= TAB 1: FAKTOR & POHON FAKTOR LOGIC ================= */
+        function setFaktorPreset(val) {
+            document.getElementById('faktor-input').value = val;
+            document.getElementById('faktor-slider').value = val;
+            renderFaktorModule();
+        }
+
+        function renderFaktorModule() {
+            const num = parseInt(document.getElementById('faktor-input').value) || 24;
+            document.querySelectorAll('.val-num').forEach(el => el.innerText = num);
+
+            // 1. Render Factor Badges
+            const factors = getFactors(num);
+            const listEl = document.getElementById('faktor-list');
+            listEl.innerHTML = factors.map(f => 
+                `<span class="px-2.5 py-1 bg-white border border-indigo-200 text-indigo-800 rounded-lg text-xs font-bold shadow-sm">${f}</span>`
+            ).join('');
+
+            // 2. Render Prime Factorization Text
+            const primes = getPrimeFactors(num);
+            document.getElementById('faktor-prima-text').innerHTML = formatPrimeExponent(primes);
+
+            // 3. Build Factor Tree Graph (SVG)
+            renderFactorTree(num);
+
+            // 4. Render Grid Pairs
+            renderGridPairs(num, factors);
+        }
+
+        function renderFactorTree(n) {
+            const container = document.getElementById('tree-container');
+            container.innerHTML = '';
+
+            // Build binary tree structure of factors
+            function buildTreeData(val) {
+                if (val < 2) return { val };
+                const primes = getPrimeFactors(val);
+                if (primes.length <= 1) return { val, isPrime: true };
+                
+                const p1 = primes[0];
+                const p2 = val / p1;
+                return {
+                    val,
+                    isPrime: false,
+                    left: { val: p1, isPrime: true },
+                    right: buildTreeData(p2)
+                };
+            }
+
+            const treeData = buildTreeData(n);
+
+            // Render SVG layout
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "320");
+            svg.setAttribute("viewBox", "0 0 500 320");
+
+            let nodesHTML = '';
+            let linesHTML = '';
+
+            function traverse(node, x, y, levelX) {
+                if (!node) return;
+
+                const circleColor = node.isPrime ? "#10b981" : "#6366f1"; // Green for prime, Indigo for composite
+                const textColor = "#ffffff";
+
+                // Node Circle
+                nodesHTML += `
+                    <g transform="translate(${x},${y})" class="transition-all duration-300">
+                        <circle r="22" fill="${circleColor}" stroke="#ffffff" stroke-width="3" shadow="md"/>
+                        <text y="6" text-anchor="middle" fill="${textColor}" font-weight="bold" font-size="14 font-family="Plus Jakarta Sans">${node.val}</text>
+                    </g>
+                `;
+
+                if (node.left) {
+                    const lx = x - levelX;
+                    const ly = y + 65;
+                    linesHTML += `<line x1="${x}" y1="${y+20}" x2="${lx}" y2="${ly-20}" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="3 3"/>`;
+                    traverse(node.left, lx, ly, levelX * 0.55);
+                }
+
+                if (node.right) {
+                    const rx = x + levelX;
+                    const ry = y + 65;
+                    linesHTML += `<line x1="${x}" y1="${y+20}" x2="${rx}" y2="${ry-20}" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="3 3"/>`;
+                    traverse(node.right, rx, ry, levelX * 0.55);
+                }
+            }
+
+            traverse(treeData, 250, 40, 110);
+            svg.innerHTML = linesHTML + nodesHTML;
+            container.appendChild(svg);
+        }
+
+        function renderGridPairs(num, factors) {
+            const container = document.getElementById('grid-pairs-container');
+            container.innerHTML = '';
+
+            let pairs = [];
+            for (let i = 0; i < factors.length; i++) {
+                let f1 = factors[i];
+                let f2 = num / f1;
+                if (f1 <= f2) {
+                    pairs.push([f1, f2]);
+                }
+            }
+
+            pairs.forEach(([r, c]) => {
+                let gridDots = '';
+                let total = r * c;
+                // Render mini box layout representing rows x cols
+                let displayR = Math.min(r, 12);
+                let displayC = Math.min(c, 12);
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col justify-between hover:border-indigo-300 transition shadow-sm";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-slate-500">Susunan ${r} × ${c}</span>
+                        <span class="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">${total}</span>
+                    </div>
+                    <div class="flex items-center justify-center p-3 bg-white rounded-lg border border-slate-100 min-h-[90px]">
+                        <div class="grid gap-1 max-w-full overflow-hidden" style="grid-template-columns: repeat(${displayC}, minmax(0, 1fr));">
+                            ${Array(displayR * displayC).fill(0).map(() => `<div class="w-2.5 h-2.5 bg-indigo-500 rounded-sm"></div>`).join('')}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        /* ================= TAB 2: KPK LOGIC ================= */
+        function renderKPKModule() {
+            const a = parseInt(document.getElementById('kpk-a').value) || 4;
+            const b = parseInt(document.getElementById('kpk-b').value) || 6;
+
+            document.getElementById('kpk-val-a').innerText = a;
+            document.getElementById('kpk-val-b').innerText = b;
+            document.querySelectorAll('.kpk-num-a').forEach(e => e.innerText = a);
+            document.querySelectorAll('.kpk-num-b').forEach(e => e.innerText = b);
+
+            const kpkVal = lcm(a, b);
+            document.getElementById('kpk-result').innerText = kpkVal;
+
+            // Generate multiples list
+            const multA = [];
+            const multB = [];
+            for (let i = 1; i <= 10; i++) multA.push(a * i);
+            for (let i = 1; i <= 10; i++) multB.push(b * i);
+
+            // Render Track A
+            const trackA = document.getElementById('kpk-track-a');
+            trackA.innerHTML = multA.map(m => {
+                const isKPK = (m % kpkVal === 0);
+                return `
+                    <div class="flex-shrink-0 flex flex-col items-center justify-center w-12 h-12 rounded-xl font-bold text-sm ${isKPK ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-300 pulse-highlight' : 'bg-blue-50 text-blue-800 border border-blue-200'}">
+                        ${m}
+                        ${isKPK ? '<span class="text-[9px] font-extrabold text-emerald-200">KPK</span>' : ''}
+                    </div>
+                `;
+            }).join('');
+
+            // Render Track B
+            const trackB = document.getElementById('kpk-track-b');
+            trackB.innerHTML = multB.map(m => {
+                const isKPK = (m % kpkVal === 0);
+                return `
+                    <div class="flex-shrink-0 flex flex-col items-center justify-center w-12 h-12 rounded-xl font-bold text-sm ${isKPK ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-300 pulse-highlight' : 'bg-amber-50 text-amber-800 border border-amber-200'}">
+                        ${m}
+                        ${isKPK ? '<span class="text-[9px] font-extrabold text-emerald-200">KPK</span>' : ''}
+                    </div>
+                `;
+            }).join('');
+
+            // Render Unified Line (0 - max limit)
+            const maxVal = Math.min(Math.max(kpkVal * 2, 30), 60);
+            const unifiedLine = document.getElementById('kpk-unified-line');
+            let unifiedHTML = '';
+            for (let i = 1; i <= maxVal; i++) {
+                const isA = (i % a === 0);
+                const isB = (i % b === 0);
+                const isBoth = isA && isB;
+
+                let bgClass = "bg-white text-slate-400 border-slate-200";
+                if (isBoth) bgClass = "bg-emerald-600 text-white border-emerald-700 font-extrabold ring-2 ring-emerald-400 pulse-highlight";
+                else if (isA) bgClass = "bg-blue-100 text-blue-800 border-blue-300 font-bold";
+                else if (isB) bgClass = "bg-amber-100 text-amber-800 border-amber-300 font-bold";
+
+                unifiedHTML += `
+                    <div class="flex-shrink-0 w-8 h-10 rounded-lg border flex flex-col items-center justify-center text-xs ${bgClass}">
+                        <span>${i}</span>
+                        ${isBoth ? '<span class="text-[7px]">KPK</span>' : ''}
+                    </div>
+                `;
+            }
+            unifiedLine.innerHTML = unifiedHTML;
+        }
+
+        /* ================= TAB 3: FPB LOGIC ================= */
+        function renderFPBModule() {
+            const a = parseInt(document.getElementById('fpb-a').value) || 24;
+            const b = parseInt(document.getElementById('fpb-b').value) || 36;
+
+            const fpbVal = gcd(a, b);
+            document.getElementById('fpb-result-val').innerText = fpbVal;
+            document.getElementById('tile-dim').innerText = `${a} × ${b}`;
+
+            const factorsA = getFactors(a);
+            const factorsB = getFactors(b);
+
+            const onlyA = factorsA.filter(x => !factorsB.includes(x));
+            const onlyB = factorsB.filter(x => !factorsA.includes(x));
+            const common = factorsA.filter(x => factorsB.includes(x));
+
+            // Render Venn Diagram
+            const venn = document.getElementById('venn-container');
+            venn.innerHTML = `
+                <div class="relative w-full max-w-[420px] h-[220px] flex items-center justify-center">
+                    <!-- Circle A -->
+                    <div class="absolute left-4 w-52 h-52 bg-purple-500/20 border-2 border-purple-500 rounded-full p-4 flex flex-col items-start justify-center">
+                        <span class="text-xs font-bold text-purple-900 absolute top-3 left-6">Faktor ${a}</span>
+                        <div class="flex flex-wrap gap-1 max-w-[90px] mt-2">
+                            ${onlyA.map(f => `<span class="px-1.5 py-0.5 bg-purple-100 text-purple-800 font-bold text-xs rounded">${f}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Circle B -->
+                    <div class="absolute right-4 w-52 h-52 bg-indigo-500/20 border-2 border-indigo-500 rounded-full p-4 flex flex-col items-end justify-center">
+                        <span class="text-xs font-bold text-indigo-900 absolute top-3 right-6">Faktor ${b}</span>
+                        <div class="flex flex-wrap gap-1 max-w-[90px] mt-2 justify-end">
+                            ${onlyB.map(f => `<span class="px-1.5 py-0.5 bg-indigo-100 text-indigo-800 font-bold text-xs rounded">${f}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Intersection Center -->
+                    <div class="z-10 flex flex-col items-center justify-center text-center px-2">
+                        <span class="text-[10px] font-extrabold uppercase text-purple-900 bg-purple-200/80 px-2 py-0.5 rounded-full mb-1">Irisan (Faktor Sama)</span>
+                        <div class="flex flex-wrap gap-1 justify-center max-w-[120px]">
+                            ${common.map(f => {
+                                const isFPB = (f === fpbVal);
+                                return `<span class="px-2 py-1 ${isFPB ? 'bg-purple-700 text-white font-black text-sm ring-2 ring-purple-300 scale-110' : 'bg-white text-purple-900 font-bold text-xs border border-purple-300'} rounded-lg shadow-sm">${f}</span>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Render Geometric Tile Grid (Euclidean Rect Tiling)
+            renderTilingGrid(a, b, fpbVal);
+        }
+
+        function renderTilingGrid(a, b, fpbVal) {
+            const container = document.getElementById('tiling-container');
+            container.innerHTML = '';
+
+            const cols = a / fpbVal;
+            const rows = b / fpbVal;
+
+            const maxDisplayCols = Math.min(cols, 10);
+            const maxDisplayRows = Math.min(rows, 10);
+
+            const grid = document.createElement('div');
+            grid.className = "grid gap-1 bg-slate-200 p-2 rounded-xl border border-slate-300 max-w-full max-h-full overflow-auto";
+            grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const tile = document.createElement('div');
+                    tile.className = "w-8 h-8 sm:w-10 sm:h-10 bg-purple-600 hover:bg-purple-500 rounded text-white flex items-center justify-center font-bold text-[10px] shadow-xs transition";
+                    tile.innerText = `${fpbVal}x${fpbVal}`;
+                    grid.appendChild(tile);
+                }
+            }
+
+            container.appendChild(grid);
+        }
+
+        /* ================= TAB 4: TERAPAN NYATA SIMULATORS ================= */
+        function runBusSimulation() {
+            const busA = parseInt(document.getElementById('sim-bus-a').value) || 12;
+            const busB = parseInt(document.getElementById('sim-bus-b').value) || 18;
+
+            document.getElementById('sim-bus-a-lbl').innerText = busA;
+            document.getElementById('sim-bus-b-lbl').innerText = busB;
+
+            const kpkMin = lcm(busA, busB);
+            document.getElementById('sim-kpk-result').innerText = `${kpkMin} Menit`;
+
+            // Calculate start time 07:00 + kpkMin
+            const startHour = 7;
+            const startMin = 0;
+            const totalMin = startMin + kpkMin;
+            const resHour = startHour + Math.floor(totalMin / 60);
+            const resMin = totalMin % 60;
+            const formattedTime = `${String(resHour).padStart(2, '0')}:${String(resMin).padStart(2, '0')} WIB`;
+            document.getElementById('sim-kpk-time').innerText = formattedTime;
+
+            // Render Timetable visual
+            const visual = document.getElementById('bus-timeline-visual');
+            let timelineItems = '';
+            for (let m = 0; m <= Math.min(kpkMin * 1.5, 90); m += 6) {
+                const isA = (m > 0 && m % busA === 0);
+                const isB = (m > 0 && m % busB === 0);
+                const isBoth = isA && isB;
+
+                if (m === 0 || isA || isB) {
+                    timelineItems += `
+                        <div class="flex justify-between items-center text-xs py-1.5 border-b border-slate-800 ${isBoth ? 'bg-emerald-900/60 text-emerald-300 font-bold px-2 rounded-md' : ''}">
+                            <span class="text-slate-400 font-mono">+${m} menit (${String(7 + Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')})</span>
+                            <div class="flex items-center space-x-2">
+                                ${isBoth ? '<span class="bg-emerald-500 text-slate-900 text-[10px] font-extrabold px-2 py-0.5 rounded">BERTEMU BERSAMA!</span>' : ''}
+                                ${isA ? '<span class="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[10px]">Bus A</span>' : ''}
+                                ${isB ? '<span class="bg-amber-600 text-white px-1.5 py-0.5 rounded text-[10px]">Bus B</span>' : ''}
+                                ${m === 0 ? '<span class="text-slate-400 text-[10px]">Awal Berangkat</span>' : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            visual.innerHTML = `
+                <div class="text-xs font-bold text-slate-400 mb-2 border-b border-slate-800 pb-1 flex justify-between">
+                    <span>Garis Waktu Keberangkatan</span>
+                    <span class="text-emerald-400">Jam Awal: 07.00 WIB</span>
+                </div>
+                <div class="space-y-1 max-h-[160px] overflow-y-auto custom-scrollbar">
+                    ${timelineItems}
+                </div>
+            `;
+        }
+
+        function runParcelSimulation() {
+            const itemA = parseInt(document.getElementById('sim-item-a').value) || 24;
+            const itemB = parseInt(document.getElementById('sim-item-b').value) || 36;
+
+            document.getElementById('sim-item-a-lbl').innerText = `${itemA} Apel`;
+            document.getElementById('sim-item-b-lbl').innerText = `${itemB} Jeruk`;
+
+            const fpbBags = gcd(itemA, itemB);
+            const perBagA = itemA / fpbBags;
+            const perBagB = itemB / fpbBags;
+
+            document.getElementById('sim-fpb-bags').innerText = `${fpbBags} Kantong`;
+            document.getElementById('sim-fpb-per-bag').innerText = `${perBagA} 🍎 Apel & ${perBagB} 🍊 Jeruk`;
+
+            // Render Bags Graphic
+            const visual = document.getElementById('parcel-bags-visual');
+            visual.innerHTML = '';
+
+            for (let i = 1; i <= fpbBags; i++) {
+                const bag = document.createElement('div');
+                bag.className = "bg-white p-2.5 rounded-xl border border-purple-200 shadow-sm flex flex-col items-center justify-center text-center space-y-1 w-24";
+                bag.innerHTML = `
+                    <i class="fa-solid fa-bag-shopping text-purple-600 text-lg"></i>
+                    <span class="text-[10px] font-bold text-purple-900">Kantong #${i}</span>
+                    <div class="text-[11px] font-extrabold text-slate-700">
+                        ${perBagA} 🍎 <br> ${perBagB} 🍊
+                    </div>
+                `;
+                visual.appendChild(bag);
+            }
+        }
+
+        /* ================= TAB 5: UNIVERSAL SOLVER ================= */
+        function calculateUniversalSolver() {
+            const x = parseInt(document.getElementById('calc-x').value);
+            const y = parseInt(document.getElementById('calc-y').value);
+            const zInput = document.getElementById('calc-z').value;
+            const z = zInput ? parseInt(zInput) : null;
+
+            if (!x || !y) return;
+
+            let fpbResult = 0;
+            let kpkResult = 0;
+
+            if (z) {
+                fpbResult = gcd(x, gcd(y, z));
+                kpkResult = lcm(x, lcm(y, z));
+            } else {
+                fpbResult = gcd(x, y);
+                kpkResult = lcm(x, y);
+            }
+
+            document.getElementById('out-fpb-val').innerText = fpbResult;
+            document.getElementById('out-kpk-val').innerText = kpkResult;
+
+            // Generate Step-by-Step Breakdown
+            const stepsContainer = document.getElementById('out-steps-content');
+            let stepsHTML = '';
+
+            const primesX = getPrimeFactors(x);
+            const primesY = getPrimeFactors(y);
+            const primesZ = z ? getPrimeFactors(z) : null;
+
+            stepsHTML += `
+                <div class="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
+                    <span class="font-bold text-slate-800 text-xs block">1. Uraian Faktorisasi Prima:</span>
+                    <ul class="list-disc list-inside text-xs space-y-1 font-mono text-indigo-900">
+                        <li>${x} = ${primesX.join(' × ')} (${formatPrimeExponent(primesX)})</li>
+                        <li>${y} = ${primesY.join(' × ')} (${formatPrimeExponent(primesY)})</li>
+                        ${z ? `<li>${z} = ${primesZ.join(' × ')} (${formatPrimeExponent(primesZ)})</li>` : ''}
+                    </ul>
+                </div>
+
+                <div class="p-3 bg-purple-50 rounded-xl border border-purple-200 text-xs space-y-1">
+                    <span class="font-bold text-purple-900 block">2. Cara Menghitung FPB:</span>
+                    <p class="text-purple-800">
+                        Ambil faktor prima yang <b>SAMA</b> saja dengan pangkat <b>TERKECIL</b>.
+                    </p>
+                    <p class="font-bold text-purple-900 mt-1">Hasil FPB = ${fpbResult}</p>
+                </div>
+
+                <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs space-y-1">
+                    <span class="font-bold text-emerald-900 block">3. Cara Menghitung KPK:</span>
+                    <p class="text-emerald-800">
+                        Kalikan <b>SEMUA</b> faktor prima. Jika ada faktor yang sama, ambil yang pangkatnya <b>TERBESAR</b>.
+                    </p>
+                    <p class="font-bold text-emerald-900 mt-1">Hasil KPK = ${kpkResult}</p>
+                </div>
+            `;
+
+            stepsContainer.innerHTML = stepsHTML;
+            document.getElementById('solver-output').classList.remove('hidden');
+        }
+
+        /* Initial Render on Page Load */
+        window.onload = function() {
+            renderFaktorModule();
+            renderKPKModule();
+            renderFPBModule();
+            runBusSimulation();
+            runParcelSimulation();
+        };
+    </script>
+</body>
+</html>
